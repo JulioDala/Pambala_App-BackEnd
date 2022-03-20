@@ -1,5 +1,5 @@
 const db = require('./db')
-
+const Pais = require('./Pais')
 const Provincia = db.sequelize.define('provincia', {
     nome: {
         type: db.Sequelize.STRING,
@@ -7,6 +7,12 @@ const Provincia = db.sequelize.define('provincia', {
     }
 })
 
-// Provincia.sync({force:true});
+Provincia.belongsTo(Pais,{
+    constraint:true
+})
+
+Pais.hasMany(Provincia)
+
+// Provincia.sync({alter:true});
  module.exports = Provincia;
 

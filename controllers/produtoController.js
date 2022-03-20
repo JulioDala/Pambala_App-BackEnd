@@ -49,15 +49,7 @@ const produtoController = {
             res.status(500).send("Ocorreu um erro")
         } else {
             try {
-                const Encontrar = await Produto.findAll(
-                    {
-                        where: {
-                            preco: {
-                                [Op.between]: [1000, 10000]
-                            }
-                        }, include: [{ association: 'categorium', where: { nome: req.body.categoria } },{ association: 'sub_categorium', where: { nome: req.body.sub_categoria } }, { association: 'avaliacao_usuarios', where: { estrela: req.body.avaliacao } }]
-                    }
-                )
+                const Encontrar = await Produto.findAll()
                 res.json((Encontrar))
             } catch (err) {
                 res.status(500).send("Ocorreu um erro" + err)
@@ -103,6 +95,23 @@ const produtoController = {
                 const Encontrar = await Produto.findAll({
                     include: avaliacaoUsuario,
                 })
+                res.json((Encontrar))
+            } catch (err) {
+                res.status(500).send("Ocorreu um erro" + err)
+            }
+        }
+    },
+    filter: async () => {
+        const { id } = req.params;
+        const user = await User.findByPk(id);
+        if (!user) {
+            res.status(500).send("Ocorreu um erro")
+        } else {
+            try {
+                const Encontrar = await Produto.findAll(
+                    {
+                        include: [{ association: 'categorium', where: { nome: req.body.categoria } }, { association: 'sub_categorium', where: { nome: req.body.sub_categoria } }]
+                    })
                 res.json((Encontrar))
             } catch (err) {
                 res.status(500).send("Ocorreu um erro" + err)

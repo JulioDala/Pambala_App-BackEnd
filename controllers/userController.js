@@ -18,8 +18,13 @@ const userController = {
             provincia: req.body.provincia,
             municipio: req.body.municipio,
             bi: req.body.bi,
+            sexo: req.body.sexo,
+            whatsapp: req.body.whatsapp,
+            nascimento: req.body.nascimento,
+            imagem: req.file.filename,
             tipo_usuario: req.body.tipo_usuario,
-            senha: bcrypt.hashSync(req.body.senha)
+            senha: bcrypt.hashSync(req.body.senha),
+            bairroId: req.body.bairro
         })
         try {
             console.log(resultadoCreate);
@@ -42,35 +47,37 @@ const userController = {
         const token = jwt.sign({ id: selectUser.id, tipo_usuario: selectUser.tipo_usuario }, process.env.TOKEN_SECRET)
         res.header('authorization-token', token)
         res.cookie('token', token, { httpOnly: true })
-        res.status(200).json({ status: 1, token: token, id: selectUser.id, nome: selectUser.nome, tipo: selectUser.tipo_usuario });
+        res.status(200).json({ status: 1, token: token, id: selectUser.id, nome: selectUser.nome, tipo: selectUser.tipo_usuario,imagem: selectUser.imagem });
+    },
+    updateImage: async (req, res) => {
+        const resultadoSave = await User.update({ imagem: req.file.filename},{where:{id:req.params.id}})
+            try {
+                res.json(resultadoSave);
+            } catch (err) {
+                res.status(500).send("Ocorreu um erro" + err)
+            }
+
     },
     update: async (req, res) => {
-
-        const user = await User.findByPk(req.params.id);
-        console.log(user)
-        nome: req.body.nome;
-        email: req.body.email;
-        telefone: req.body.telefone;
-        dataNascimento: req.body.dataNascimento;
-        provincia: req.body.provincia;
-        municipio: req.body.municipio;
-        bi: req.body.bi;
-        senha: req.body.senha;
-
-        const resultadoSave = await user.update().then(() => {
-            console.log(resultadoSave)
-            res.send("Usuário Actualizado com sucesso");
-        }).catch((err) => {
-            res.send("Houve Algum erro" + err);
-        });
+        const resultadoSave = await User.update(req.body,{where:{id:req.params.id}})
+            try {
+                res.json(resultadoSave);
+            } catch (err) {
+                res.status(500).send("Ocorreu um erro" + err)
+            }
 
     },
     list: async (req, res) => {
 
-        const Encontrar = await User.findAll()
+        const Encontrar = await User.findAll({ include: [{ association: 'bairro', include: [{ association: 'municipio', include: [{ association: 'provincium', include: [{ association: 'pai' }] }] }] }] })
         const total = Encontrar.length
         console.log(Encontrar)
-        res.json(({Encontrar:Encontrar,total:total}))
+        res.json(({ Encontrar: Encontrar, total: total }))
+    },
+    listOne: async (req, res) => {
+        const Encontrar = await User.findOne({ where: { id: req.params.id }, include: [{ association: 'bairro', include: [{ association: 'municipio', include: [{ association: 'provincium', include: [{ association: 'pai' }] }] }] }] })
+        console.log(Encontrar)
+        res.json(( Encontrar))
     },
     delete: (req, res) => {
         User.destroy({ where: { id: req.params.id } })
@@ -106,11 +113,11 @@ const userController = {
     logout: async (req, res) => {
         const token = req.headers.token;
         if (token) {
-            res.cookie('token', null, {httpOnly:true})
+            res.cookie('token', null, { httpOnly: true })
         } else {
-                    res.status(401).send(" Logout Não autorizado" )
-                } 
-                    res.send("Sessão finalizada com sucesso")
+            res.status(401).send(" Logout Não autorizado")
+        }
+        res.send("Sessão finalizada com sucesso")
     }
 
 }
