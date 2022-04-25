@@ -1,8 +1,6 @@
 const Categoria = require('../models/Categoria')
 const SubCategoria = require('../models/SubCategoria')
-
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
+const Promocao = require('../models/Promocao')
 
 const categoriaController = {
     register: async (req, res) => {
@@ -12,14 +10,7 @@ const categoriaController = {
             return res.status(400).send("O email ou Nº de telefone já existem")
         }
         const resultadoCreate = await Categoria.create({
-            nome: req.body.nome,
-            email: req.body.email,
-            telefone: req.body.telefone,
-            provincia: req.body.provincia,
-            municipio: req.body.municipio,
-            bi: req.body.bi,
-            tipo_usuario: req.body.tipo_usuario,
-            senha: bcrypt.hashSync(req.body.senha)
+            nome: req.body.nome
         })
         try {
             console.log(resultadoCreate);
@@ -30,34 +21,43 @@ const categoriaController = {
     },
     update: async (req, res) => {
 
-        const user = await User.findByPk(req.params.id);
-        console.log(user)
-        nome: req.body.nome;
-        email: req.body.email;
-        telefone: req.body.telefone;
-        dataNascimento: req.body.dataNascimento;
-        provincia: req.body.provincia;
-        municipio: req.body.municipio;
-        bi: req.body.bi;
-        senha: req.body.senha;
-
-        const resultadoSave = await user.update().then(() => {
-            console.log(resultadoSave)
-            res.send("Usuário Actualizado com sucesso");
-        }).catch((err) => {
-            res.send("Houve Algum erro" + err);
-        });
+        const resultadoSave = await SubCategoria.findAll({ include: Categoria, where: { categoriumId: req.params.id } })
+        try {
+            res.json(resultadoSave);
+        } catch (err) {
+            res.status(500).send("Ocorreu um erro" + err)
+        }
 
     },
     list: async (req, res) => {
-        const Encontrar = await Categoria.findAll({include: SubCategoria})
+        const Encontrar = await Categoria.findAll({ include: SubCategoria })
         console.log(Encontrar)
         res.json((Encontrar))
     },
-    delete: (req, res) => {
-        User.destroy({ where: { id: req.params.id } })
+    listProdutos: async (req, res) => {
+        const Encontrar = await SubCategoria.findAll({ where: { categoriumId: req.params.id } })
+        const total = Encontrar.length
+        res.json(({ Encontrar: Encontrar, total: total }))
+    },
+    apagarProdutos: async (req, res) => {
+        const Encontrar = await SubCategoria.destroy({ where: { id: req.params.id } })
         try {
             res.status(200).send("Usuário Apagado com sucesso");
+        } catch (err) {
+            res.status(500).send("Ocorreu um erro" + err)
+        }
+    },
+    delete: async (req, res) => {
+
+        const resultadoCreate = await Promocao.create({
+            imagem1: req.files['imagem1'][0].filename,
+            imagem2: req.files['imagem2'][0].filename,
+            imagem3: req.files['imagem3'][0].filename,
+            imagem: req.files['imagem'][0].filename,
+        })
+        try {
+            console.log(resultadoCreate);
+            res.status(200).json(resultadoCreate);
         } catch (err) {
             res.status(500).send("Ocorreu um erro" + err)
         }

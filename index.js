@@ -1,9 +1,13 @@
 require('dotenv').config();
 const express = require('express');
-const bodyParser = require('body-parser')
-const cors = require('cors')
-// const aluno = require('./Routes/aluno'
 const app = express();
+const bodyParser = require('body-parser')
+const server = require("http").createServer(app);
+const PORT = 3003;
+const cors = require("cors");
+const io = require("socket.io")(server, { cors: { origin: "http://localhost:3000" } });
+// const aluno = require('./Routes/aluno'
+
 const userRoute = require('./Routes/userRoute')
 const adminRoute = require('./Routes/adminRoute')
 
@@ -22,10 +26,24 @@ app.get("/",(req,res)=>{
 })
 
 
-app.listen(3003,(error)=>{
-    if (!error) {
-        console.log("servidor rodando na porta 3003");
-    } else {
-        console.log(error)
-    }
-})
+io.on("connect", (socket) => {
+	console.log("New user connected!");
+	let nameSocket;
+
+	socket.on("userConnected", (name) => {
+		nameSocket = name;
+		io.emit("receiveMessage", { bot: true, message: `${name} connected!` });
+	});
+
+	socket.on("message", (data) => {
+		console.log(data);
+		io.emit("receiveMessage", data);
+	});
+
+	socket.on("disconnect", () => {
+		if (!nameSocket) return;
+		io.emit("receiveMessage", { bot: true, message: `${nameSocket} left!` });
+	});
+});
+
+server.listen(PORT, () => console.log("Server running..."));

@@ -1,23 +1,30 @@
 const db = require('./db')
-const Produto = require('./Produto')
+const Anuncio = require('./Anuncio')
+const User = require('./User')
 
 const avaliacaoUsuario = db.sequelize.define('avaliacao_usuario', {
     estrela: {
         type: db.Sequelize.INTEGER,
-        allowNull:false
+        allowNull: false
     },
     descricao: {
         type: db.Sequelize.TEXT,
-        allowNull:false
+        allowNull: false
     }
 })
 
-avaliacaoUsuario.belongsTo(Produto,{
-    constraint:true,
+avaliacaoUsuario.belongsTo(Anuncio, {
+    constraint: true,
 })
 
-Produto.hasMany(avaliacaoUsuario)
+Anuncio.hasMany(avaliacaoUsuario)
 
-// avaliacaoUsuario.sync({force:true});
- module.exports = avaliacaoUsuario;
+avaliacaoUsuario.belongsTo(User, {
+    constraint: true,
+})
+
+User.hasOne(avaliacaoUsuario)
+
+// avaliacaoUsuario.sync({ force: true });
+module.exports = avaliacaoUsuario;
 

@@ -1,8 +1,10 @@
 const Municipio = require('../models/Municipio')
 const Provincia = require('../models/Provincia')
-
+const Categoria = require('../models/Categoria')
+const User = require('../models/User')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const Bairro = require('../models/Bairro')
 
 const provinciaController = {
     register: async (req, res) => {
@@ -30,27 +32,26 @@ const provinciaController = {
     },
     update: async (req, res) => {
 
-        const user = await User.findByPk(req.params.id);
-        console.log(user)
-        nome: req.body.nome;
-        email: req.body.email;
-        telefone: req.body.telefone;
-        dataNascimento: req.body.dataNascimento;
-        provincia: req.body.provincia;
-        municipio: req.body.municipio;
-        bi: req.body.bi;
-        senha: req.body.senha;
-
-        const resultadoSave = await user.update().then(() => {
-            console.log(resultadoSave)
-            res.send("Usuário Actualizado com sucesso");
-        }).catch((err) => {
-            res.send("Houve Algum erro" + err);
-        });
 
     },
     list: async (req, res) => {
-        const Encontrar = await Provincia.findAll({include: Municipio})
+        const Encontrar = await Provincia.findAll({ include: [{ association: 'municipios', include: [{ association: 'bairros' }] }] })
+        console.log(Encontrar)
+        res.json((Encontrar))
+    },
+
+    listprovincia: async (req, res) => {
+        const Encontrar = await Bairro.findAll()
+        console.log(Encontrar)
+        res.json((Encontrar))
+    },
+    listmunicipio: async (req, res) => {
+        const Encontrar = await Bairro.findAll({ include: [{ association: 'municipios', include: [{ association: 'bairros' }] }] })
+        console.log(Encontrar)
+        res.json((Encontrar))
+    },
+    listbairro: async (req, res) => {
+        const Encontrar = await Bairro.findAll({ where: { municipioId: req.params.id } })
         console.log(Encontrar)
         res.json((Encontrar))
     },

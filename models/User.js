@@ -1,54 +1,54 @@
 const db = require('./db')
-const Bairro = require('./Bairro')
+const Municipio = require('./Municipio')
 const User = db.sequelize.define('user', {
     nome: {
         type: db.Sequelize.STRING,
-        allowNull:false
+        allowNull: false
     },
     email: {
         type: db.Sequelize.STRING,
-        allowNull:false
+        allowNull: false
     },
     telefone: {
         type: db.Sequelize.INTEGER,
-        allowNull:false
+        allowNull: false
     },
     bi: {
         type: db.Sequelize.STRING,
-        allowNull:false
+        allowNull: false
     },
     tipo_usuario: {
         type: db.Sequelize.INTEGER,
-        default:1
+        default: 1
     },
     senha: {
         type: db.Sequelize.STRING,
-        allowNull:false
+        allowNull: false
     },
     imagem: {
         type: db.Sequelize.STRING,
-        allowNull:true
+        allowNull: true
     },
     sexo: {
-        type: db.Sequelize.ENUM('M','F'),
-        allowNull:false
+        type: db.Sequelize.ENUM('M', 'F'),
+        allowNull: false
     },
     nascimento: {
         type: db.Sequelize.DATEONLY,
-        allowNull:false
+        allowNull: false
     },
     whatsapp: {
         type: db.Sequelize.STRING,
-        allowNull:true
+        allowNull: true
     }
 })
 
-User.belongsTo(Bairro,{
-    constraint:true
+User.belongsTo(Municipio, {
+    constraint: true
 })
 
-Bairro.hasMany(User)
+Municipio.hasMany(User)
 
-// User.sync({alter:true});
- module.exports = User;
+// User.sync({ alter: true });
+module.exports = User;
 

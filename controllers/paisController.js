@@ -8,7 +8,12 @@ const paisController = {
 
     },
     update: async (req, res) => {
-
+        const resultadoSave = await Pais.update(req.body,{where:{id:req.params.id}})
+        try {
+            res.json(resultadoSave);
+        } catch (err) {
+            res.status(500).send("Ocorreu um erro" + err)
+        }
     },
     list: async (req, res) => {
         const Encontrar = await Pais.findAll({ include: [{ association: 'provincia', include: [{ association: 'municipios',include: [{association:'bairros'}]}] }] })

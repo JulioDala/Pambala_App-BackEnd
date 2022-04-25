@@ -1,30 +1,27 @@
 const db = require('./db')
-const Produto = require('./Produto')
+const Anuncio = require('./Anuncio')
 const User = require('./User')
 
 const Favorito = db.sequelize.define('favorito', {
     id: {
         type: db.Sequelize.INTEGER,
-        autoIncrement:true,
-        allowNull:false,
-        primaryKey:true
+        autoIncrement: true,
+        allowNull: false,
+        primaryKey: true
     }
 })
 
-Produto.belongsToMany(User,{
-    through:{model: Favorito},
-    constraint:true,
-    foreignKey: 'produto_id',
-    otherKey: 'user_id',
+Favorito.belongsTo(User, {
+    constraint: true
+})
+User.hasMany(Favorito)
+
+Favorito.belongsTo(Anuncio, {
+    constraint: true
 })
 
-User.belongsToMany(Produto,{
-    through:{model: Favorito},
-    constraint:true,
-    foreignKey: 'user_id',
-    otherKey: 'produto_id',
-})
+Anuncio.hasMany(Favorito)
 
-// Favorito.sync({force:true});
- module.exports = Favorito;
+// Favorito.sync({ force: true });
+module.exports = Favorito;
 

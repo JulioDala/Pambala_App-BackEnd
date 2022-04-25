@@ -1,5 +1,5 @@
 const User = require('../models/User')
-const Produto = require('../models/Produto')
+const Anuncio = require('../models/Anuncio')
 
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
@@ -15,8 +15,6 @@ const userController = {
             nome: req.body.nome,
             email: req.body.email,
             telefone: req.body.telefone,
-            provincia: req.body.provincia,
-            municipio: req.body.municipio,
             bi: req.body.bi,
             sexo: req.body.sexo,
             whatsapp: req.body.whatsapp,
@@ -24,10 +22,9 @@ const userController = {
             imagem: req.file.filename,
             tipo_usuario: req.body.tipo_usuario,
             senha: bcrypt.hashSync(req.body.senha),
-            bairroId: req.body.bairro
+            municipioId: req.body.municipio
         })
         try {
-            console.log(resultadoCreate);
             res.status(200).json(resultadoCreate);
         } catch (err) {
             res.status(500).send("Ocorreu um erro" + err)
@@ -47,37 +44,40 @@ const userController = {
         const token = jwt.sign({ id: selectUser.id, tipo_usuario: selectUser.tipo_usuario }, process.env.TOKEN_SECRET)
         res.header('authorization-token', token)
         res.cookie('token', token, { httpOnly: true })
-        res.status(200).json({ status: 1, token: token, id: selectUser.id, nome: selectUser.nome, tipo: selectUser.tipo_usuario,imagem: selectUser.imagem });
+        res.status(200).json({ status: 1, token: token, id: selectUser.id, nome: selectUser.nome, tipo: selectUser.tipo_usuario, imagem: selectUser.imagem });
     },
     updateImage: async (req, res) => {
-        const resultadoSave = await User.update({ imagem: req.file.filename},{where:{id:req.params.id}})
-            try {
-                res.json(resultadoSave);
-            } catch (err) {
-                res.status(500).send("Ocorreu um erro" + err)
-            }
+        const resultadoSave = await User.update({ imagem: req.file.filename }, { where: { id: req.params.id } })
+        try {
+            res.json(resultadoSave);
+        } catch (err) {
+            res.status(500).send("Ocorreu um erro" + err)
+        }
 
     },
     update: async (req, res) => {
-        const resultadoSave = await User.update(req.body,{where:{id:req.params.id}})
-            try {
-                res.json(resultadoSave);
-            } catch (err) {
-                res.status(500).send("Ocorreu um erro" + err)
-            }
+        const resultadoSave = await User.update(req.body, { where: { id: req.params.id } })
+        try {
+            res.json(resultadoSave);
+        } catch (err) {
+            res.status(500).send("Ocorreu um erro" + err)
+        }
 
     },
     list: async (req, res) => {
 
-        const Encontrar = await User.findAll({ include: [{ association: 'bairro', include: [{ association: 'municipio', include: [{ association: 'provincium', include: [{ association: 'pai' }] }] }] }] })
+        const Encontrar = await User.findAll({ include: [{ association: 'municipio', include: [{ association: 'provincium', include: [{ association: 'pai' }] }] }] })
         const total = Encontrar.length
         console.log(Encontrar)
         res.json(({ Encontrar: Encontrar, total: total }))
     },
+    listUsers: async (req, res) => {
+        const Encontrar = await User.findAll({ where: { tipo_usuario: req.params.id }, include: [{ association: 'municipio', include: [{ association: 'provincium', include: [{ association: 'pai' }] }] }] })
+        res.json((Encontrar))
+    },
     listOne: async (req, res) => {
-        const Encontrar = await User.findOne({ where: { id: req.params.id }, include: [{ association: 'bairro', include: [{ association: 'municipio', include: [{ association: 'provincium', include: [{ association: 'pai' }] }] }] }] })
-        console.log(Encontrar)
-        res.json(( Encontrar))
+        const Encontrar = await User.findOne({ where: { id: req.params.id }, include: [{ association: 'municipio', include: [{ association: 'provincium', include: [{ association: 'pai' }] }] }] })
+        res.json((Encontrar))
     },
     delete: (req, res) => {
         User.destroy({ where: { id: req.params.id } })
@@ -90,7 +90,7 @@ const userController = {
     uploadImage: async (req, res) => {
         if (req.file) {
             console.log(req.file)
-            const resultadoCreate = await Produto.create({ imagem: req.file.filename })
+            const resultadoCreate = await Anuncio.create({ imagem: req.file.filename })
             return res.status(200).json({ mensagem: "Upload feito com sucesso" });
         } else {
             return res.status(500).json({ mensagem: "Ocorreu um erro" })
